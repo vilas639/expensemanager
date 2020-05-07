@@ -1,11 +1,22 @@
+import 'dart:io';
+
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+
 import 'package:expensemanager/Model/transaction.dart';
 import 'package:expensemanager/widget/chart.dart';
 import 'package:expensemanager/widget/usertranList.dart';
 import 'package:expensemanager/widget/usertranform.dart';
 
-import 'package:flutter/material.dart';
 
-void main() => runApp(MyApp());
+
+void main() {
+// WidgetsFlutterBinding.ensureInitialized();
+//   SystemChrome.setPreferredOrientations([
+//     DeviceOrientation.portraitUp,DeviceOrientation.portraitDown
+//   ]);
+  runApp(MyApp());
+}
 
 class MyApp extends StatelessWidget {
   // This widget is the root of your application.
@@ -59,6 +70,7 @@ class _MyHomePageState extends State<MyHomePage> {
     //     id: '2', title: 'Mutual Funds', amount: 600, date: DateTime.now()),
   ];
 
+  bool _showchart = false;
   List<Transaction> get _recentTransactions {
     return myTransaction.where((tx) {
       return tx.date.isAfter(
@@ -106,31 +118,75 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
+    final mediaquery = MediaQuery.of(context);
+    final isLandscape =
+        MediaQuery.of(context).orientation == Orientation.landscape;
+
+    final appbar = AppBar(
+      title: Text(widget.title),
+      actions: <Widget>[
+        IconButton(
+          icon: Icon(Icons.add),
+          onPressed: () => _startAddNewTransaction(context),
+        )
+      ],
+    );
+
+    final txListWidget = Container(
+        height: (mediaquery.size.height -
+                appbar.preferredSize.height -
+                mediaquery.padding.top) *
+            0.7,
+        child: usertranList(this.myTransaction, this._deleteTransaction));
+
     return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.title),
-        actions: <Widget>[
-          IconButton(
-            icon: Icon(Icons.add),
-            onPressed: () => _startAddNewTransaction(context),
-          )
-        ],
-      ),
+      appBar: appbar,
       body: SingleChildScrollView(
         child: Center(
           child: Column(
             // mainAxisAlignment: MainAxisAlignment.spaceAround,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: <Widget>[
-              Chart(_recentTransactions),
-              usertranList(this.myTransaction, this._deleteTransaction)
+              if (isLandscape)
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    Text('show chart'),
+                    Switch.adaptive(
+                      activeColor:  Theme.of(context).accentColor,
+                        value: _showchart,
+                        onChanged: (val) {
+                          setState(() {
+                            _showchart = val;
+                          });
+                        })
+                  ],
+                ),
+              if (!isLandscape)
+                Container(
+                    height: (mediaquery.size.height -
+                            appbar.preferredSize.height -
+                            mediaquery.padding.top) *
+                        0.3,
+                    child: Chart(_recentTransactions)),
+              if (!isLandscape) txListWidget,
+              if (isLandscape)
+                _showchart
+                    ? Container(
+                        height: (mediaquery.size.height -
+                                appbar.preferredSize.height -
+                                mediaquery.padding.top) *
+                            0.7,
+                        child: Chart(_recentTransactions),
+                      )
+                    : txListWidget
             ],
           ),
         ),
       ),
       // This trailing comma makes auto-formatting nicer for build methods.
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-      floatingActionButton: FloatingActionButton(
+      floatingActionButton: Platform.isIOS ?  Container(): FloatingActionButton(
         onPressed: () => _startAddNewTransaction(context),
         child: Icon(Icons.add),
       ),

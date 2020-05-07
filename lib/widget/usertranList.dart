@@ -1,5 +1,6 @@
 import 'package:expensemanager/Model/transaction.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:intl/intl.dart';
 
 class usertranList extends StatelessWidget {
@@ -10,27 +11,31 @@ class usertranList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: MediaQuery.of(context).size.height - 360,
-      child: myTransaction1.isEmpty
-          ? Column(
-              children: <Widget>[
-                Text(
-                  'No transaction Availble Yet !',
-                  style: Theme.of(context).textTheme.title,
-                ),
-                SizedBox(
-                  height: 20,
-                ),
-                Container(
-                  height: 200,
-                  child: Image.asset(
-                    'assets/images/waiting.png',
-                    fit: BoxFit.cover,
+    return myTransaction1.isEmpty
+          ? LayoutBuilder(
+             builder: (ctx, Constraints)
+             {
+     return Column(
+                children: <Widget>[
+                  Text(
+                    'No transaction Availble Yet !',
+                    style: Theme.of(context).textTheme.title,
                   ),
-                )
-              ],
-            )
+                  SizedBox(
+                    height: 20,
+                  ),
+                  Container(
+                    height: Constraints.maxHeight * 0.6,
+                    child: Image.asset(
+                      'assets/images/waiting.png',
+                      fit: BoxFit.cover,
+                    ),
+                  )
+                ],
+              );
+             },
+                 
+          )
           : ListView.builder(
               itemBuilder: (ctx, index) {
                 return Card(
@@ -68,7 +73,14 @@ class usertranList extends StatelessWidget {
                             fontWeight: FontWeight.normal,
                             color: Colors.grey,
                           )),
-                          trailing: IconButton(
+                          trailing:  MediaQuery.of(context).size.width > 420 ? 
+                          FlatButton.icon(
+                             icon: Icon(Icons.delete),
+                             textColor: Theme.of(context).errorColor,
+                             label: Text('delete'),
+                             onPressed: () => deleteTx(myTransaction1[index].id),
+
+                            ) :IconButton(
                              icon: Icon(Icons.delete),
                              color: Theme.of(context).errorColor,
                              onPressed: () => deleteTx(myTransaction1[index].id),
@@ -77,7 +89,7 @@ class usertranList extends StatelessWidget {
                     ));
               },
               itemCount: myTransaction1.length,
-            ),
-    );
+            );
+    
   }
 }
