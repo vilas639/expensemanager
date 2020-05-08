@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 import 'package:expensemanager/Model/transaction.dart';
 import 'package:expensemanager/widget/chart.dart';
@@ -61,7 +60,7 @@ class MyHomePage extends StatefulWidget {
   _MyHomePageState createState() => _MyHomePageState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
+class _MyHomePageState extends State<MyHomePage>   with WidgetsBindingObserver{
   //creat a array ofm trnascations
   final List<Transaction> myTransaction = [
     // Transaction(
@@ -70,6 +69,26 @@ class _MyHomePageState extends State<MyHomePage> {
     //     id: '2', title: 'Mutual Funds', amount: 600, date: DateTime.now()),
   ];
 
+
+   @override
+  void initState() {
+    WidgetsBinding.instance.addObserver(this);
+    super.initState();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    print(state);
+  }
+
+  @override
+  dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+
+    
   bool _showchart = false;
   List<Transaction> get _recentTransactions {
     return myTransaction.where((tx) {
@@ -118,6 +137,8 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
+
+    print("build() main");
     final mediaquery = MediaQuery.of(context);
     final isLandscape =
         MediaQuery.of(context).orientation == Orientation.landscape;
@@ -192,4 +213,7 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
     );
   }
+}
+
+mixin didChangeAppLifecycleState {
 }
